@@ -7,34 +7,38 @@ import UserOutput from './UserOutput/UserOutput'
 class App extends Component {
   state = {
     persons: [
-      {name: 'Steve', age: 96},
-      {name: 'fjksf', age: 22},
-      {name: 'ajy', age: 852}
+      {id: '0', name: 'Steve', age: 96},
+      {id: '1', name: 'fjksf', age: 22},
+      {id: '2', name: 'ajy', age: 852}
     ],
     otherState: 'some other value',
     username: 'defult-username',
     showPersons: false
   }
 
-  switchNameHandler = (newName) => {
-    // console.log('wasClicked');
-    //DONT DO THISthis.state.persons[0].name = 'STEVE';
-    this.setState({
-      persons: [
-        {name: newName, age: 96},
-        {name: 'fjksf', age: 22},
-        {name: 'AAAA', age: 852}
-      ] 
-    })
+  deletePersonHandler = (personIndex) => {
+    // const persons = this.state.persons.slice(); //works. es5  or...
+    const persons = [...this.state.persons];
+    persons.splice(personIndex,1);
+    this.setState({persons: persons})
   }
 
-  nameChangedHandler = (event) => {
+  nameChangedHandler = (event, id) => {
+    const personIndex = this.state.persons.findIndex(p => {
+      return p.id === id;
+    });
+    //const person = Object.assign({},this.state.persons[personIndex]);  //es5
+    const person =  {
+      ...this.state.persons[personIndex]
+    };
+
+    person.name = event.target.value
+
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
+
     this.setState({
-      persons: [
-        {name: 'STEVEOO', age: 96},
-        {name: event.target.value, age: 22},
-        {name: 'AAAA', age: 852}
-      ] 
+      persons: persons
     })
   }
 
@@ -62,16 +66,17 @@ class App extends Component {
     if (this.state.showPersons){
       persons = (
           <div>
-            <Person 
-              name={this.state.persons[0].name}
-              age={this.state.persons[0].age}/>
-            <Person 
-              name={this.state.persons[1].name}
-              age={this.state.persons[1].age}
-              click={this.switchNameHandler.bind(this,'Steve3')}
-              changed={this.nameChangedHandler}
-              >Hobbies: none</Person>
-            <Person name={this.state.persons[2].name} age={this.state.persons[2].age}/>
+          {this.state.persons.map((person, index) =>{
+            return (
+              <Person
+                click={() => this.deletePersonHandler(index)}
+                name={person.name} 
+                age={person.age}
+                key={person.id}
+                changed={(event) => this.nameChangedHandler(event, person.id)}
+              />
+            )
+          })}
           </div>
       );
     }
@@ -81,7 +86,7 @@ class App extends Component {
         <h1>Hi Im a React App</h1>
         <button 
           style={style}
-          onClick={this.togglePersonsHandler}>Toggle Persons
+          onClick={this.togglePersonsHandler}>Toggle Person
         </button>
         {persons}
         <UserInput name={this.state.username} change={this.userHandler}/>
