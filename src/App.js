@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import './App.css';
 import Person from './Person/Person';
 import UserInput from './UserInput/UserInput';
-import UserOutput from './UserOutput/UserOutput'
+import UserOutput from './UserOutput/UserOutput';
+import VComponent from './ValidationComponent/ValidationComponent';
+import CComponent from './CharComponent/CharComponent';
 
 class App extends Component {
   state = {
@@ -13,7 +15,9 @@ class App extends Component {
     ],
     otherState: 'some other value',
     username: 'defult-username',
-    showPersons: false
+    showPersons: false,
+    chars: [],
+    numChars: 0
   }
 
   deletePersonHandler = (personIndex) => {
@@ -31,12 +35,9 @@ class App extends Component {
     const person =  {
       ...this.state.persons[personIndex]
     };
-
     person.name = event.target.value
-
     const persons = [...this.state.persons];
     persons[personIndex] = person;
-
     this.setState({
       persons: persons
     })
@@ -45,6 +46,13 @@ class App extends Component {
   userHandler = (event) => {
     this.setState({
       username: event.target.value
+    });
+  }
+
+  textInputHandler = (event) => {
+    this.setState({
+      chars: [...event.target.value,],
+      numChars: event.target.value.length
     })
   }
 
@@ -53,9 +61,16 @@ class App extends Component {
     this.setState({showPersons: !doesShow})
   }
   
+  clickCharHandler = (idx) => {
+    let newChars = this.state.chars;
+    newChars.splice(idx,1);
+    this.setState({chars:newChars})
+  }
+
   render() {
     const style = {
-      backgroundColor: 'white',
+      backgroundColor: 'green',
+      color: 'white',
       font: 'inherit',
       border: '1px solid blue',
       padding: '8px',
@@ -79,11 +94,36 @@ class App extends Component {
           })}
           </div>
       );
+      style.backgroundColor = 'red';
     }
 
+    let charString = null;
+    if (this.state.numChars > 0){ 
+      charString = (
+        <div>
+        {this.state.chars.map( (curChar,index) => {
+          return (
+            <CComponent
+              click={() => this.clickCharHandler(index)}
+              dChar={curChar}
+              idx={index}
+            />
+          )
+        })}
+        </div>
+      );
+    }
+    let classes = [];
+    if (this.state.persons.length <= 2){
+      classes.push('red');
+    }
+    if (this.state.persons.length <= 1) {
+      classes.push('bold');
+    }
     return (
       <div className="App">
         <h1>Hi Im a React App</h1>
+        <p className={classes.join(' ')}>Learning</p>
         <button 
           style={style}
           onClick={this.togglePersonsHandler}>Toggle Person
@@ -91,6 +131,10 @@ class App extends Component {
         {persons}
         <UserInput name={this.state.username} change={this.userHandler}/>
         <UserOutput username={this.state.username} />
+        <input type="text" value={this.state.chars.join('')} onChange={this.textInputHandler}/>
+        <p>{this.state.numChars}</p>
+        <VComponent size={this.state.numChars} />
+        {charString}
       </div>
     );
   }
